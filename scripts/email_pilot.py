@@ -3,16 +3,16 @@ UASWFC Email Pilot Script
 Runs in GitHub Actions. Queries AGOL for records with processing_status = 'awaiting_approval',
 downloads all deliverable attachments, and emails them to the pilot with approve/revision links.
 
+Approval links point to a static GitHub Pages site that calls AGOL REST API directly
+from the browser using a short-lived token embedded in the URL.
+
 Environment variables (from GitHub Secrets):
-    AGOL_USERNAME, AGOL_PASSWORD, GMAIL_APP_PASSWORD,
-    APPROVAL_SECRET, APPROVAL_SCRIPT_URL
+    AGOL_USERNAME, AGOL_PASSWORD, GMAIL_APP_PASSWORD
 """
 
 import os
 import sys
 import json
-import hmac
-import hashlib
 import smtplib
 import requests
 import tempfile
@@ -21,6 +21,7 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
 from datetime import datetime
+from urllib.parse import quote
 
 
 # =============================================================================
@@ -30,8 +31,6 @@ from datetime import datetime
 AGOL_USERNAME = os.environ["AGOL_USERNAME"]
 AGOL_PASSWORD = os.environ["AGOL_PASSWORD"]
 GMAIL_APP_PASSWORD = os.environ["GMAIL_APP_PASSWORD"]
-APPROVAL_SECRET = os.environ["APPROVAL_SECRET"]
-APPROVAL_SCRIPT_URL = os.environ["APPROVAL_SCRIPT_URL"]
 
 GMAIL_FROM = "uaswfc@gmail.com"
 SMTP_SERVER = "smtp.gmail.com"
@@ -44,22 +43,29 @@ SURVEY_LAYER_URL = (
 
 TOKEN_URL = "https://www.arcgis.com/sharing/rest/generateToken"
 
+# GitHub Pages approval page URL
+APPROVAL_PAGE_URL = "https://tpolsky90.github.io/UASWFC/approve.html"
+
+# Token expiration for approval links (minutes)
+APPROVAL_TOKEN_EXPIRATION = 60
+
 
 # =============================================================================
 # AGOL HELPERS
 # =============================================================================
 
-def get_agol_token():
-    """Authenticate to AGOL and return a token."""
+def get_agol_token(expiration_minutes=120):
+    """Authenticate to AGOL and return a token with specified expiration."""
     resp = requests.post(TOKEN_URL, data={
         "username": AGOL_USERNAME,
         "password": AGOL_PASSWORD,
         "referer": "https://www.arcgis.com",
+        "expiration": expiration_minutes,
         "f": "json"
     })
     data = resp.json()
     if "token" in data:
-        print(f"[AUTH] Token acquired")
+        print(f"[AUTH] Token acquired (expires in {expiration_minutes} min)")
         return data["token"]
     else:
         print(f"[AUTH] FAILED: {data}")
@@ -131,19 +137,16 @@ def update_status(token, oid, status, notes=""):
 # APPROVAL LINK GENERATION
 # =============================================================================
 
-def compute_hmac(message):
-    """Generate HMAC-SHA256 hex signature."""
-    return hmac.new(
-        APPROVAL_SECRET.encode(),
-        message.encode(),
-        hashlib.sha256
-    ).hexdigest()
-
-
-def make_approval_url(oid, action):
-    """Build a signed approval or revision URL."""
-    sig = compute_hmac(f"{action}:{oid}")
-    return f"{APPROVAL_SCRIPT_URL}?action={action}&oid={oid}&sig={sig}"
+def make_approval_url(oid, action, approval_token, incident_name):
+    """Build an approval or revision URL pointing to GitHub Pages."""
+    incident_encoded = quote(incident_name.strip())
+    return (
+        f"{APPROVAL_PAGE_URL}"
+        f"?action={action}"
+        f"&oid={oid}"
+        f"&token={approval_token}"
+        f"&incident={incident_encoded}"
+    )
 
 
 # =============================================================================
@@ -187,11 +190,11 @@ def build_email_body(attrs, oid, approve_url, revision_url):
     <div style="background: white; border: 1px solid #ddd; border-radius: 6px; padding: 16px; margin: 20px 0;">
         <p style="margin: 0 0 8px 0; font-weight: bold;">Attached Files:</p>
         <p style="margin: 0; line-height: 1.8;">
-            📄 Map PDF (11x17 Topo, geospatial)<br>
-            📦 Shapefiles (NIROPS convention, zipped)<br>
-            📦 GDB (NIFS compatible, zipped)<br>
-            🌐 KMZ (Google Earth, zipped)<br>
-            📋 IRN Log PDF (Interpreter's Daily Log)
+            Map PDF (11x17 Topo, geospatial)<br>
+            Shapefiles (NIROPS convention, zipped)<br>
+            GDB (NIFS compatible, zipped)<br>
+            KMZ (Google Earth, zipped)<br>
+            IRN Log PDF (Interpreter's Daily Log)
         </p>
     </div>
 
@@ -203,26 +206,27 @@ def build_email_body(attrs, oid, approve_url, revision_url):
            style="display: inline-block; background: #28a745; color: white; text-decoration: none;
                   padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold;
                   margin: 0 8px;">
-            ✅ APPROVE DELIVERABLES
+            APPROVE DELIVERABLES
         </a>
 
         <a href="{revision_url}"
            style="display: inline-block; background: #dc3545; color: white; text-decoration: none;
                   padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold;
                   margin: 0 8px;">
-            🔄 REQUEST REVISION
+            REQUEST REVISION
         </a>
     </div>
 
     <p style="font-size: 13px; color: #666;">
-        Once approved, the deliverable package will be automatically distributed to the incident team
-        and uploaded to NIFC (when FTP credentials are available).
+        Approval links are valid for {APPROVAL_TOKEN_EXPIRATION} minutes. Once approved, the deliverable
+        package will be automatically distributed to the incident team and uploaded to NIFC
+        (when FTP credentials are available).
     </p>
 
 </div>
 
 <div style="background: #eee; padding: 12px; border-radius: 0 0 8px 8px; text-align: center; font-size: 11px; color: #999;">
-    UASWFC Processing Engine v5 &nbsp;|&nbsp; Submission OID: {oid} &nbsp;|&nbsp; {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}
+    UASWFC Processing Engine v5 | Submission OID: {oid} | {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}
 </div>
 
 </body>
@@ -264,7 +268,7 @@ def send_email(to_address, subject, html_body, attachment_paths):
 # MAIN
 # =============================================================================
 
-def process_record(token, feature):
+def process_record(token, approval_token, feature):
     """Process a single awaiting_approval record: download attachments, email pilot."""
     attrs = feature["attributes"]
     oid = attrs["objectid"]
@@ -284,21 +288,18 @@ def process_record(token, feature):
     print(f"  Found {len(attachments)} attachments")
 
     # Filter to deliverable files only (skip the original NOVA zip upload)
-    # Deliverables are: *_IR_11x17_Topo.pdf, *_IR.zip, *_IR_gdb.zip, *_IR_KMZ.zip, *_IRN_Log.pdf
     deliverable_keywords = ["_IR_11x17", "_IR.zip", "_IR_gdb", "_IR_KMZ", "_IRN_Log"]
     nova_keywords = ["nova", "NOVA"]
 
     deliverable_attachments = []
     for att in attachments:
         name = att["name"]
-        # Skip the original NOVA zip upload
         is_nova = any(kw in name for kw in nova_keywords)
         is_deliverable = any(kw in name for kw in deliverable_keywords)
 
         if is_deliverable and not is_nova:
             deliverable_attachments.append(att)
         elif not is_nova:
-            # Include anything that's not the NOVA zip (might be a deliverable with unexpected name)
             deliverable_attachments.append(att)
 
     if not deliverable_attachments:
@@ -321,11 +322,10 @@ def process_record(token, feature):
 
     if total_size > 24 * 1024 * 1024:
         print(f"  WARNING: Total size exceeds 24 MB. Gmail may reject this.")
-        # Still try, but log the warning
 
-    # Build approval links
-    approve_url = make_approval_url(oid, "approve")
-    revision_url = make_approval_url(oid, "revision")
+    # Build approval links using short-lived token
+    approve_url = make_approval_url(oid, "approve", approval_token, incident)
+    revision_url = make_approval_url(oid, "revision", approval_token, incident)
 
     # Build and send email
     flight_date_str = ""
@@ -366,7 +366,12 @@ def main():
     print(f"Run: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
     print("=" * 60)
 
-    token = get_agol_token()
+    # Get a long-lived token for downloading attachments
+    token = get_agol_token(expiration_minutes=120)
+
+    # Get a short-lived token for the approval links (embedded in URL)
+    approval_token = get_agol_token(expiration_minutes=APPROVAL_TOKEN_EXPIRATION)
+    print(f"Approval token valid for {APPROVAL_TOKEN_EXPIRATION} minutes")
 
     # Query for awaiting_approval records
     features = query_features(token, "processing_status = 'awaiting_approval'")
@@ -378,7 +383,7 @@ def main():
 
     for feature in features:
         try:
-            process_record(token, feature)
+            process_record(token, approval_token, feature)
         except Exception as e:
             oid = feature["attributes"].get("objectid", "?")
             print(f"\nERROR processing OID {oid}: {e}")

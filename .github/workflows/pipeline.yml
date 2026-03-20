@@ -1,14 +1,13 @@
 # UASWFC Event-Driven Pipeline
 #
-# Triggered by repository_dispatch from Google Apps Script webhook hub.
+# Triggered by repository_dispatch from webhooks or manual trigger.
 # Three event types:
-#   survey_submitted    → Execute AGOL Notebook to process the submission
-#   processing_complete → Download deliverables, email to pilot with approve/revision links
-#   submission_approved → Distribute to FTP + wider email list (future)
+#   survey_submitted    -> Execute AGOL Notebook to process the submission
+#   processing_complete -> Download deliverables, email to pilot with approve/revision links
+#   submission_approved -> Distribute to FTP + wider email list (future)
 #
 # Required Secrets:
-#   AGOL_USERNAME, AGOL_PASSWORD, GMAIL_APP_PASSWORD,
-#   PAT_TOKEN, APPROVAL_SECRET, APPROVAL_SCRIPT_URL
+#   AGOL_USERNAME, AGOL_PASSWORD, GMAIL_APP_PASSWORD, PAT_TOKEN
 #
 # Also runs on schedule as a fallback in case a webhook is missed.
 
@@ -101,12 +100,10 @@ jobs:
           AGOL_USERNAME: ${{ secrets.AGOL_USERNAME }}
           AGOL_PASSWORD: ${{ secrets.AGOL_PASSWORD }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          APPROVAL_SECRET: ${{ secrets.APPROVAL_SECRET }}
-          APPROVAL_SCRIPT_URL: ${{ secrets.APPROVAL_SCRIPT_URL }}
         run: python scripts/email_pilot.py
 
   # -----------------------------------------------------------------
-  # JOB 3: Distribute (triggered by pilot approval) — FUTURE
+  # JOB 3: Distribute (triggered by pilot approval) -- FUTURE
   # -----------------------------------------------------------------
   distribute:
     if: >
@@ -137,7 +134,7 @@ jobs:
         run: python scripts/distribute.py
 
   # -----------------------------------------------------------------
-  # TEST: Acknowledge test pings from Apps Script
+  # TEST: Acknowledge test pings
   # -----------------------------------------------------------------
   test_ping:
     if: >
@@ -147,5 +144,5 @@ jobs:
     steps:
       - name: Ping received
         run: |
-          echo "Test ping received from Apps Script"
+          echo "Test ping received"
           echo "Payload: ${{ toJson(github.event.client_payload) }}"

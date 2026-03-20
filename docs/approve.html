@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UASWFC Approval</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 48px;
+            max-width: 520px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+        }
+        .icon { font-size: 64px; margin-bottom: 16px; }
+        h1 { margin: 0 0 16px 0; font-size: 24px; }
+        p { color: #555; line-height: 1.6; margin: 0 0 12px 0; }
+        .success h1 { color: #28a745; }
+        .error h1 { color: #dc3545; }
+        .info h1 { color: #17a2b8; }
+        .warning h1 { color: #ffc107; }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a472a;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .footer {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #999;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            margin: 12px 0;
+            resize: vertical;
+        }
+        button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="card" id="card">
+        <div class="spinner"></div>
+        <h1>Processing...</h1>
+        <p>Updating submission status. Please wait.</p>
+    </div>
+
+    <script>
+        // Parse URL parameters
+        var params = new URLSearchParams(window.location.search);
+        var action = params.get('action');
+        var oid = params.get('oid');
+        var token = params.get('token');
+        var sig = params.get('sig');
+        var incident = params.get('incident') || 'your submission';
+
+        var SURVEY_LAYER_URL = 'https://services3.arcgis.com/SLthvBvwSE65InmN/arcgis/rest/services/service_76ac8ff74c8644ccad5843dfbc61c6d8/FeatureServer/0';
+
+        function showResult(iconEmoji, title, message, cssClass) {
+            var card = document.getElementById('card');
+            card.className = 'card ' + cssClass;
+            card.innerHTML =
+                '<div class="icon">' + iconEmoji + '</div>' +
+                '<h1>' + title + '</h1>' +
+                '<p>' + message + '</p>' +
+                '<p class="footer">UAS Wildland Fire Collaborative</p>';
+        }
+
+        function showRevisionForm() {
+            var card = document.getElementById('card');
+            card.className = 'card warning';
+            card.innerHTML =
+                '<div class="icon">🔄</div>' +
+                '<h1>Request Revision</h1>' +
+                '<p>Please describe what needs to be corrected for <strong>' + incident + '</strong> (OID ' + oid + '):</p>' +
+                '<textarea id="revisionNotes" rows="4" placeholder="Describe the issue (e.g., perimeter shifted west, missing heat sources on south flank...)"></textarea>' +
+                '<button onclick="submitRevision()">Submit Revision Request</button>' +
+                '<p class="footer">UAS Wildland Fire Collaborative</p>';
+        }
+
+        function updateFeature(status, notes) {
+            var feature = {
+                attributes: {
+                    objectid: parseInt(oid),
+                    processing_status: status,
+                    processing_notes: notes.substring(0, 1000)
+                }
+            };
+
+            var formData = new URLSearchParams();
+            formData.append('features', JSON.stringify([feature]));
+            formData.append('f', 'json');
+            formData.append('token', token);
+
+            return fetch(SURVEY_LAYER_URL + '/updateFeatures', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(resp) { return resp.json(); })
+            .then(function(data) {
+                if (data.updateResults && data.updateResults[0] && data.updateResults[0].success) {
+                    return true;
+                }
+                console.error('Update failed:', data);
+                return false;
+            });
+        }
+
+        function submitRevision() {
+            var notes = document.getElementById('revisionNotes').value || 'Revision requested (no details provided)';
+            var card = document.getElementById('card');
+            card.innerHTML =
+                '<div class="spinner"></div>' +
+                '<h1>Submitting...</h1>' +
+                '<p>Sending revision request.</p>';
+
+            updateFeature('revision_requested', 'Pilot revision: ' + notes)
+                .then(function(success) {
+                    if (success) {
+                        showResult('🔄', 'Revision Requested',
+                            'OID ' + oid + ' (' + incident + ') has been flagged for revision. The processing team has been notified.',
+                            'warning');
+                    } else {
+                        showResult('❌', 'Update Failed',
+                            'Could not update the submission status. The AGOL token may have expired. Please contact the system administrator.',
+                            'error');
+                    }
+                })
+                .catch(function(err) {
+                    showResult('❌', 'Connection Error',
+                        'Could not reach ArcGIS Online: ' + err.message,
+                        'error');
+                });
+        }
+
+        // Main logic
+        (function() {
+            // Validate params
+            if (!action || !oid || !token) {
+                showResult('❌', 'Missing Parameters',
+                    'This link appears to be incomplete. Please use the link from your email.',
+                    'error');
+                return;
+            }
+
+            if (action === 'revision') {
+                showRevisionForm();
+                return;
+            }
+
+            if (action === 'approve') {
+                // First check current status
+                var queryUrl = SURVEY_LAYER_URL + '/query?where=objectid%3D' + oid +
+                    '&outFields=processing_status&f=json&token=' + token;
+
+                fetch(queryUrl)
+                    .then(function(resp) { return resp.json(); })
+                    .then(function(data) {
+                        if (data.features && data.features.length > 0) {
+                            var currentStatus = data.features[0].attributes.processing_status;
+                            if (currentStatus === 'approved' || currentStatus === 'distributed') {
+                                showResult('ℹ️', 'Already Processed',
+                                    'This submission (OID ' + oid + ') has already been ' + currentStatus + '. No action needed.',
+                                    'info');
+                                return;
+                            }
+                        }
+
+                        // Proceed with approval
+                        var now = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+                        updateFeature('approved', 'Approved by pilot via email link at ' + now)
+                            .then(function(success) {
+                                if (success) {
+                                    showResult('✅', 'Deliverables Approved!',
+                                        'OID ' + oid + ' (' + incident + ') has been approved. The deliverable package will be distributed to the incident team shortly.',
+                                        'success');
+                                } else {
+                                    showResult('❌', 'Update Failed',
+                                        'Could not update the submission status. The AGOL token may have expired (tokens are valid for 60 minutes). Please contact the system administrator.',
+                                        'error');
+                                }
+                            });
+                    })
+                    .catch(function(err) {
+                        showResult('❌', 'Connection Error',
+                            'Could not reach ArcGIS Online: ' + err.message,
+                            'error');
+                    });
+            } else {
+                showResult('❌', 'Unknown Action',
+                    'The action "' + action + '" is not recognized. Please use the links from your email.',
+                    'error');
+            }
+        })();
+    </script>
+</body>
+</html>
