@@ -49,24 +49,6 @@ google_apps_script/
 | `APPROVAL_SCRIPT_URL` | Deployed Google Apps Script web app URL (set after deploying) |
 | `NOTEBOOK_ITEM_ID` | AGOL item ID for the processing Notebook (optional, for auto-trigger) |
 
-### 2. Google Apps Script Deployment
-
-1. Go to [script.google.com](https://script.google.com) (sign in with uaswfc@gmail.com)
-2. Create a new project, name it "UASWFC Webhook Hub"
-3. Paste the contents of `google_apps_script/webhook_handler.gs`
-4. Go to Project Settings → Script Properties, add:
-    - `GITHUB_PAT` → same as PAT_TOKEN secret
-    - `GITHUB_REPO` → `tpolsky90/UASWFC`
-    - `AGOL_USERNAME` → `polsky90`
-    - `AGOL_PASSWORD` → your AGOL password
-    - `APPROVAL_SECRET` → same value as GitHub APPROVAL_SECRET
-    - `SURVEY_LAYER_URL` → `https://services3.arcgis.com/SLthvBvwSE65InmN/arcgis/rest/services/service_76ac8ff74c8644ccad5843dfbc61c6d8/FeatureServer/0`
-5. Deploy → New Deployment → Web App
-    - Execute as: Me
-    - Who has access: Anyone
-6. Copy the deployment URL
-7. Add it as the `APPROVAL_SCRIPT_URL` GitHub secret
-
 ### 3. Survey123 Webhook
 
 1. Go to survey123.arcgis.com → your survey → Settings → Webhooks
