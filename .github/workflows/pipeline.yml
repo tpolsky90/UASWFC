@@ -1,15 +1,14 @@
 # UASWFC Event-Driven Pipeline
 #
-# Triggered by repository_dispatch from webhooks or manual trigger.
-# Three event types:
+# Primary trigger: Cloudflare Worker webhook router fires repository_dispatch
 #   survey_submitted    -> Execute AGOL Notebook to process the submission
 #   processing_complete -> Download deliverables, email to pilot with approve/revision links
 #   submission_approved -> Distribute to FTP + wider email list (future)
 #
-# Required Secrets:
-#   AGOL_USERNAME, AGOL_PASSWORD, GMAIL_APP_PASSWORD, PAT_TOKEN
+# Fallback: 5-minute cron polls for any missed webhooks
 #
-# Also runs on schedule as a fallback in case a webhook is missed.
+# Required Secrets:
+#   AGOL_USERNAME, AGOL_PASSWORD, GMAIL_APP_PASSWORD, NOTEBOOK_ITEM_ID, PAT_TOKEN
 
 name: UASWFC Pipeline
 
@@ -22,8 +21,8 @@ on:
       - test_ping
 
   schedule:
-    # Fallback poll every 15 minutes
-    - cron: '*/15 * * * *'
+    # Fallback poll every 5 minutes (catches missed webhooks)
+    - cron: '*/5 * * * *'
 
   workflow_dispatch:
     # Manual trigger for testing
@@ -42,6 +41,8 @@ jobs:
 
   # -----------------------------------------------------------------
   # JOB 1: Execute Notebook (triggered by Survey123 submission)
+  # Queries for pending records first. Skips if nothing to process.
+  # Concurrency group ensures only one Notebook runs at a time.
   # -----------------------------------------------------------------
   execute_notebook:
     if: >
@@ -72,10 +73,12 @@ jobs:
         env:
           AGOL_USERNAME: ${{ secrets.AGOL_USERNAME }}
           AGOL_PASSWORD: ${{ secrets.AGOL_PASSWORD }}
+          NOTEBOOK_ITEM_ID: ${{ secrets.NOTEBOOK_ITEM_ID }}
         run: python scripts/execute_notebook.py
 
   # -----------------------------------------------------------------
   # JOB 2: Email pilot (triggered by Notebook completion or schedule)
+  # Queries for awaiting_approval records. Skips if nothing to process.
   # -----------------------------------------------------------------
   email_pilot:
     if: >
