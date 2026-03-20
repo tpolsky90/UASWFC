@@ -1,0 +1,151 @@
+# UASWFC Event-Driven Pipeline
+#
+# Triggered by repository_dispatch from Google Apps Script webhook hub.
+# Three event types:
+#   survey_submitted    → Execute AGOL Notebook to process the submission
+#   processing_complete → Download deliverables, email to pilot with approve/revision links
+#   submission_approved → Distribute to FTP + wider email list (future)
+#
+# Required Secrets:
+#   AGOL_USERNAME, AGOL_PASSWORD, GMAIL_APP_PASSWORD,
+#   PAT_TOKEN, APPROVAL_SECRET, APPROVAL_SCRIPT_URL
+#
+# Also runs on schedule as a fallback in case a webhook is missed.
+
+name: UASWFC Pipeline
+
+on:
+  repository_dispatch:
+    types:
+      - survey_submitted
+      - processing_complete
+      - submission_approved
+      - test_ping
+
+  schedule:
+    # Fallback poll every 15 minutes
+    - cron: '*/15 * * * *'
+
+  workflow_dispatch:
+    # Manual trigger for testing
+    inputs:
+      job_to_run:
+        description: 'Which job to run'
+        required: true
+        default: 'email_pilot'
+        type: choice
+        options:
+          - execute_notebook
+          - email_pilot
+          - distribute
+
+jobs:
+
+  # -----------------------------------------------------------------
+  # JOB 1: Execute Notebook (triggered by Survey123 submission)
+  # -----------------------------------------------------------------
+  execute_notebook:
+    if: >
+      github.event_name == 'repository_dispatch' && 
+      github.event.action == 'survey_submitted' ||
+      github.event_name == 'workflow_dispatch' && 
+      github.event.inputs.job_to_run == 'execute_notebook'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Execute AGOL Notebook
+        env:
+          AGOL_USERNAME: ${{ secrets.AGOL_USERNAME }}
+          AGOL_PASSWORD: ${{ secrets.AGOL_PASSWORD }}
+        run: python scripts/execute_notebook.py
+
+  # -----------------------------------------------------------------
+  # JOB 2: Email pilot (triggered by Notebook completion or schedule)
+  # -----------------------------------------------------------------
+  email_pilot:
+    if: >
+      github.event_name == 'repository_dispatch' && 
+      github.event.action == 'processing_complete' ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' && 
+      github.event.inputs.job_to_run == 'email_pilot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Download deliverables and email pilot
+        env:
+          AGOL_USERNAME: ${{ secrets.AGOL_USERNAME }}
+          AGOL_PASSWORD: ${{ secrets.AGOL_PASSWORD }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          APPROVAL_SECRET: ${{ secrets.APPROVAL_SECRET }}
+          APPROVAL_SCRIPT_URL: ${{ secrets.APPROVAL_SCRIPT_URL }}
+        run: python scripts/email_pilot.py
+
+  # -----------------------------------------------------------------
+  # JOB 3: Distribute (triggered by pilot approval) — FUTURE
+  # -----------------------------------------------------------------
+  distribute:
+    if: >
+      github.event_name == 'repository_dispatch' && 
+      github.event.action == 'submission_approved' ||
+      github.event_name == 'workflow_dispatch' && 
+      github.event.inputs.job_to_run == 'distribute'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Distribute approved deliverables
+        env:
+          AGOL_USERNAME: ${{ secrets.AGOL_USERNAME }}
+          AGOL_PASSWORD: ${{ secrets.AGOL_PASSWORD }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python scripts/distribute.py
+
+  # -----------------------------------------------------------------
+  # TEST: Acknowledge test pings from Apps Script
+  # -----------------------------------------------------------------
+  test_ping:
+    if: >
+      github.event_name == 'repository_dispatch' && 
+      github.event.action == 'test_ping'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping received
+        run: |
+          echo "Test ping received from Apps Script"
+          echo "Payload: ${{ toJson(github.event.client_payload) }}"
