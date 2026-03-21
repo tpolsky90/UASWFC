@@ -337,7 +337,7 @@ def process_record(token, approval_token, feature):
         except Exception:
             pass
 
-    subject = f"UASWFC IR Deliverables: {incident.strip()} {flight_date_str}"
+    subject = f"UASWFC IR Deliverables: {(incident or 'Unknown Fire').strip()} {flight_date_str}"
     html_body = build_email_body(attrs, oid, approve_url, revision_url)
 
     try:
