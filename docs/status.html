@@ -450,7 +450,7 @@
         // CONFIGURATION
         // ==================================================================
 
-        var SURVEY_LAYER_URL = 'https://services3.arcgis.com/SLthvBvwSE65InmN/arcgis/rest/services/service_76ac8ff74c8644ccad5843dfbc61c6d8/FeatureServer/0';
+        var WORKER_STATUS_URL = 'https://uaswfc.tpolsky90.workers.dev/status';
 
         var POLL_INTERVAL_MS = 8000;  // 8 seconds
 
@@ -472,9 +472,8 @@
         // ==================================================================
 
         var params = new URLSearchParams(window.location.search);
-        var oid = params.get('oid');
-        var token = params.get('token');
-        var incidentParam = params.get('incident');
+        var user = params.get('user');
+        var oid = null;  // Set dynamically from Worker response
 
         // ==================================================================
         // STATE
@@ -605,6 +604,17 @@
                 '<div class="footer" style="margin-top: 40px;">UAS Wildland Fire Collaborative</div>';
         }
 
+        function renderWaiting() {
+            var tracker = document.getElementById('tracker');
+            tracker.innerHTML =
+                '<div class="header">' +
+                '  <div class="header-badge"><span class="dot"></span> WAITING</div>' +
+                '  <div class="incident-name">Listening for submission...</div>' +
+                '  <div class="submission-meta" style="color: var(--text-secondary); margin-top: 12px; font-size: 13px; font-family: Space Grotesk, sans-serif;">Submit a survey to begin tracking</div>' +
+                '</div>' +
+                '<div class="footer" style="margin-top: 40px;">UAS Wildland Fire Collaborative</div>';
+        }
+
         function escapeHtml(str) {
             var div = document.createElement('div');
             div.textContent = str;
@@ -629,34 +639,29 @@
         // ==================================================================
 
         function fetchStatus() {
-            var url = SURVEY_LAYER_URL + '/query';
-            var body = new URLSearchParams();
-            body.append('where', 'objectid=' + oid);
-            body.append('outFields', 'processing_status,processing_notes,incident_name,flight_date');
-            body.append('f', 'json');
-            body.append('token', token);
+            var url = WORKER_STATUS_URL + '?user=' + encodeURIComponent(user);
 
-            fetch(url, { method: 'POST', body: body })
+            fetch(url)
                 .then(function(resp) { return resp.json(); })
                 .then(function(data) {
                     if (data.error) {
-                        // Token expired or auth error
                         stopPolling();
-                        renderError('Session Expired', 'Your AGOL session has expired. Please refresh the page or reopen from Experience Builder.');
+                        renderError('Server Error', data.detail || data.error);
                         return;
                     }
 
-                    var features = data.features || [];
-                    if (features.length === 0) {
-                        renderError('Record Not Found', 'No submission found with OID ' + oid + '.');
-                        stopPolling();
+                    if (data.status === 'none') {
+                        // No submissions yet, keep polling (pilot may have just submitted)
+                        if (!currentStatus) {
+                            renderWaiting();
+                        }
                         return;
                     }
 
-                    var attrs = features[0].attributes;
-                    var status = attrs.processing_status || 'pending';
-                    var notes = attrs.processing_notes || '';
-                    var incident = attrs.incident_name || incidentParam || 'Unknown Fire';
+                    oid = data.oid;
+                    var status = data.status || 'pending';
+                    var notes = data.notes || '';
+                    var incident = data.incident || 'Unknown Fire';
 
                     // Only re-render if status changed
                     if (status !== currentStatus) {
@@ -709,8 +714,8 @@
         // INIT
         // ==================================================================
 
-        if (!oid || !token) {
-            renderError('Missing Parameters', 'This page requires an OID and token. It should be opened from Experience Builder after submitting a survey.');
+        if (!user) {
+            renderError('Missing Parameters', 'This page requires a ?user= parameter. It should be opened from Experience Builder.');
             return;
         }
 
