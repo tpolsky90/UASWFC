@@ -74,6 +74,7 @@ jobs:
           AGOL_USERNAME: ${{ secrets.AGOL_USERNAME }}
           AGOL_PASSWORD: ${{ secrets.AGOL_PASSWORD }}
           NOTEBOOK_ITEM_ID: ${{ secrets.NOTEBOOK_ITEM_ID }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: python scripts/execute_notebook.py
 
   # -----------------------------------------------------------------
