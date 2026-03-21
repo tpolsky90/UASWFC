@@ -137,6 +137,20 @@ def main():
 
             if job_status in ("succeeded", "completed"):
                 print("\nNotebook completed successfully!")
+                print("Firing processing_complete dispatch...")
+                dispatch_resp = requests.post(
+                    f"https://api.github.com/repos/tpolsky90/UASWFC/dispatches",
+                    headers={
+                        "Authorization": f"Bearer {os.environ.get('PAT_TOKEN', '')}",
+                        "Accept": "application/vnd.github+json",
+                        "X-GitHub-Api-Version": "2022-11-28"
+                    },
+                    json={
+                        "event_type": "processing_complete",
+                        "client_payload": {"source": "execute_notebook"}
+                    }
+                )
+                print(f"Dispatch response: {dispatch_resp.status_code}")
                 return
             elif job_status in ("failed", "cancelled"):
                 print(f"\nNotebook {job_status}: {status_data}")
