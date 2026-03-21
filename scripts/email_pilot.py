@@ -4,7 +4,7 @@ Runs in GitHub Actions. Queries AGOL for records with processing_status = 'await
 downloads all deliverable attachments, and emails them to the pilot with approve/revision links.
 
 Approval links point to a static GitHub Pages site that calls AGOL REST API directly
-from the browser using a short-lived token embedded in the URL.
+from the browser using a short-lived token embedded incident_encoded = quote(incident_name.strip())in the URL.
 
 Environment variables (from GitHub Secrets):
     AGOL_USERNAME, AGOL_PASSWORD, GMAIL_APP_PASSWORD
@@ -139,7 +139,7 @@ def update_status(token, oid, status, notes=""):
 
 def make_approval_url(oid, action, approval_token, incident_name):
     """Build an approval or revision URL pointing to GitHub Pages."""
-    incident_encoded = quote(incident_name.strip())
+    incident_encoded = quote((incident_name or "Unknown Fire").strip())
     return (
         f"{APPROVAL_PAGE_URL}"
         f"?action={action}"
