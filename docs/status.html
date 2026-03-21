@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UASWFC Mission Status</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e14;
+            --bg-card: #111920;
+            --bg-stage: #161d26;
+            --bg-stage-active: #1a2332;
+            --border-dim: #1e2a38;
+            --border-active: #e8772080;
+            --text-primary: #e6edf3;
+            --text-secondary: #7d8b99;
+            --text-dim: #3d4f5f;
+            --amber: #e87720;
+            --amber-glow: #e8772040;
+            --amber-bright: #ffad5c;
+            --green: #3fb950;
+            --green-glow: #3fb95040;
+            --red: #f85149;
+            --red-glow: #f8514940;
+            --blue: #58a6ff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow-x: hidden;
+        }
+
+        /* Subtle grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border-dim) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border-dim) 1px, transparent 1px);
+            background-size: 60px 60px;
+            opacity: 0.25;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .tracker {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 580px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-dim);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .header-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--amber);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .header-badge.complete .dot {
+            background: var(--green);
+            animation: none;
+        }
+
+        .header-badge.error .dot {
+            background: var(--red);
+            animation: none;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .incident-name {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+
+        .submission-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Progress bar */
+        .progress-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-dim);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+
+        .progress-pct {
+            color: var(--amber-bright);
+            font-weight: 700;
+            font-size: 20px;
+            transition: color 0.5s;
+        }
+
+        .progress-pct.complete { color: var(--green); }
+        .progress-pct.error { color: var(--red); }
+
+        .progress-label {
+            color: var(--text-secondary);
+            align-self: flex-end;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-stage);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--amber), var(--amber-bright));
+            border-radius: 4px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill.complete {
+            background: linear-gradient(90deg, var(--green), #6fdd8b);
+        }
+
+        .progress-fill.error {
+            background: linear-gradient(90deg, var(--red), #ff8080);
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+
+        .progress-fill.complete::after,
+        .progress-fill.error::after {
+            animation: none;
+            display: none;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* Stages */
+        .stages {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stage {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-dim);
+            border-radius: 10px;
+            padding: 16px 20px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stage.active {
+            border-color: var(--border-active);
+            background: var(--bg-stage-active);
+            box-shadow: 0 0 20px var(--amber-glow), inset 0 0 20px rgba(232, 119, 32, 0.03);
+        }
+
+        .stage.done {
+            border-color: var(--green-glow);
+        }
+
+        .stage.error-state {
+            border-color: var(--red);
+            background: #1a1115;
+            box-shadow: 0 0 20px var(--red-glow);
+        }
+
+        /* Active stage scanning line */
+        .stage.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--amber-glow), transparent);
+            animation: scan 2.5s ease-in-out infinite;
+        }
+
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .stage-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            background: var(--bg-stage);
+            border: 2px solid var(--border-dim);
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stage.waiting .stage-icon {
+            color: var(--text-dim);
+        }
+
+        .stage.active .stage-icon {
+            border-color: var(--amber);
+            background: #2a1a0a;
+            color: var(--amber-bright);
+            box-shadow: 0 0 12px var(--amber-glow);
+            animation: pulse-icon 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% { box-shadow: 0 0 12px var(--amber-glow); }
+            50% { box-shadow: 0 0 24px var(--amber-glow); }
+        }
+
+        .stage.done .stage-icon {
+            border-color: var(--green);
+            background: #0d2818;
+            color: var(--green);
+        }
+
+        .stage.error-state .stage-icon {
+            border-color: var(--red);
+            background: #2a0d0d;
+            color: var(--red);
+        }
+
+        .stage-content {
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stage-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+            transition: color 0.4s;
+        }
+
+        .stage.waiting .stage-title { color: var(--text-dim); }
+        .stage.active .stage-title { color: var(--text-primary); }
+        .stage.done .stage-title { color: var(--text-secondary); }
+
+        .stage-desc {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            transition: color 0.4s;
+        }
+
+        .stage.active .stage-desc { color: var(--text-secondary); }
+        .stage.done .stage-desc { color: var(--text-dim); }
+
+        .stage-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stage.active .stage-time { color: var(--amber); }
+        .stage.done .stage-time { color: var(--green); }
+
+        /* Elapsed timer */
+        .elapsed {
+            text-align: center;
+            margin-top: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .elapsed-time {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Error banner */
+        .error-banner {
+            background: #1a1115;
+            border: 1px solid var(--red);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .error-banner p {
+            font-size: 13px;
+            color: var(--red);
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        /* Loading state */
+        .loading-screen {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-dim);
+            border-top-color: var(--amber);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-screen p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Connection error */
+        .connection-note {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 11px;
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Entrance animations */
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fade-up 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .animate-in:nth-child(1) { animation-delay: 0.05s; }
+        .animate-in:nth-child(2) { animation-delay: 0.1s; }
+        .animate-in:nth-child(3) { animation-delay: 0.15s; }
+        .animate-in:nth-child(4) { animation-delay: 0.2s; }
+        .animate-in:nth-child(5) { animation-delay: 0.25s; }
+        .animate-in:nth-child(6) { animation-delay: 0.3s; }
+        .animate-in:nth-child(7) { animation-delay: 0.35s; }
+        .animate-in:nth-child(8) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <div class="tracker" id="tracker">
+        <div class="loading-screen">
+            <div class="loading-spinner"></div>
+            <p>Connecting to UASWFC...</p>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        // ==================================================================
+        // CONFIGURATION
+        // ==================================================================
+
+        var SURVEY_LAYER_URL = 'https://services3.arcgis.com/SLthvBvwSE65InmN/arcgis/rest/services/service_76ac8ff74c8644ccad5843dfbc61c6d8/FeatureServer/0';
+
+        var POLL_INTERVAL_MS = 8000;  // 8 seconds
+
+        // Stage definitions: key = processing_status value
+        var STAGES = [
+            { key: 'pending',             icon: '📡', title: 'Submitted',               desc: 'Queued for processing',              pct: 15  },
+            { key: 'processing',          icon: '🔥', title: 'Generating Deliverables',  desc: 'Building maps, shapefiles, GDB, KMZ', pct: 40  },
+            { key: 'awaiting_approval',   icon: '📋', title: 'Ready for Review',         desc: 'Deliverables generated',             pct: 65  },
+            { key: 'pilot_notified',      icon: '📧', title: 'Email Sent',               desc: 'Check your inbox',                   pct: 80  },
+            { key: 'approved',            icon: '✅', title: 'Approved',                  desc: 'Deliverables confirmed',             pct: 95  },
+            { key: 'distributed',         icon: '🌐', title: 'Distributed',              desc: 'Delivered to incident team',          pct: 100 }
+        ];
+
+        var ERROR_STATES = ['error', 'revision_requested'];
+        var TERMINAL_STATES = ['approved', 'distributed', 'error', 'revision_requested'];
+
+        // ==================================================================
+        // URL PARAMS
+        // ==================================================================
+
+        var params = new URLSearchParams(window.location.search);
+        var oid = params.get('oid');
+        var token = params.get('token');
+        var incidentParam = params.get('incident');
+
+        // ==================================================================
+        // STATE
+        // ==================================================================
+
+        var startTime = Date.now();
+        var pollTimer = null;
+        var elapsedTimer = null;
+        var currentStatus = null;
+        var isTerminal = false;
+
+        // ==================================================================
+        // RENDER
+        // ==================================================================
+
+        function renderTracker(incident, status, notes) {
+            var tracker = document.getElementById('tracker');
+
+            var stageIndex = STAGES.findIndex(function(s) { return s.key === status; });
+            var isError = ERROR_STATES.indexOf(status) !== -1;
+            var pct = 0;
+            var statusLabel = 'TRACKING';
+
+            if (isError) {
+                pct = stageIndex >= 0 ? STAGES[stageIndex].pct : 0;
+                statusLabel = 'ERROR';
+            } else if (stageIndex >= 0) {
+                pct = STAGES[stageIndex].pct;
+                statusLabel = pct === 100 ? 'COMPLETE' : 'TRACKING';
+            }
+
+            var badgeClass = 'header-badge';
+            if (pct === 100) badgeClass += ' complete';
+            if (isError) badgeClass += ' error';
+
+            var pctClass = 'progress-pct';
+            if (pct === 100) pctClass += ' complete';
+            if (isError) pctClass += ' error';
+
+            var fillClass = 'progress-fill';
+            if (pct === 100) fillClass += ' complete';
+            if (isError) fillClass += ' error';
+
+            var html = '';
+
+            // Header
+            html += '<div class="header animate-in">';
+            html += '  <div class="' + badgeClass + '"><span class="dot"></span> ' + statusLabel + '</div>';
+            html += '  <div class="incident-name">' + escapeHtml(incident || 'Unknown Fire') + '</div>';
+            html += '  <div class="submission-meta">OID ' + oid + '</div>';
+            html += '</div>';
+
+            // Progress bar
+            html += '<div class="progress-container animate-in">';
+            html += '  <div class="progress-labels">';
+            html += '    <span class="' + pctClass + '">' + pct + '%</span>';
+            html += '    <span class="progress-label">' + (isError ? status.replace('_', ' ').toUpperCase() : STAGES[Math.max(0, stageIndex)].title) + '</span>';
+            html += '  </div>';
+            html += '  <div class="progress-track">';
+            html += '    <div class="' + fillClass + '" style="width: ' + pct + '%"></div>';
+            html += '  </div>';
+            html += '</div>';
+
+            // Stages
+            html += '<div class="stages">';
+            for (var i = 0; i < STAGES.length; i++) {
+                var stage = STAGES[i];
+                var stageState = 'waiting';
+
+                if (isError) {
+                    if (i < stageIndex || (stageIndex === -1 && i === 0)) stageState = 'done';
+                    else if (i === stageIndex) stageState = 'error-state';
+                } else {
+                    if (i < stageIndex) stageState = 'done';
+                    else if (i === stageIndex) stageState = stageIndex === STAGES.length - 1 ? 'done' : 'active';
+                }
+
+                // Override: if distributed (last stage), mark it done not active
+                if (status === 'distributed' && stage.key === 'distributed') stageState = 'done';
+                // If approved but not yet distributed, approved is active
+                if (status === 'approved' && stage.key === 'approved') stageState = 'active';
+
+                var iconDisplay = stage.icon;
+                if (stageState === 'done') iconDisplay = '✓';
+                if (stageState === 'error-state') iconDisplay = '✕';
+
+                html += '<div class="stage ' + stageState + ' animate-in">';
+                html += '  <div class="stage-icon">' + iconDisplay + '</div>';
+                html += '  <div class="stage-content">';
+                html += '    <div class="stage-title">' + stage.title + '</div>';
+                html += '    <div class="stage-desc">' + stage.desc + '</div>';
+                html += '  </div>';
+                if (stageState === 'active') {
+                    html += '<div class="stage-time" id="stage-elapsed"></div>';
+                } else if (stageState === 'done') {
+                    html += '<div class="stage-time">done</div>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+
+            // Error banner
+            if (isError && notes) {
+                html += '<div class="error-banner animate-in">';
+                html += '  <p>' + escapeHtml(notes) + '</p>';
+                html += '</div>';
+            }
+
+            // Elapsed
+            html += '<div class="elapsed animate-in" id="elapsed-container">';
+            html += '  <span>Elapsed </span><span class="elapsed-time" id="elapsed-time">0:00</span>';
+            html += '</div>';
+
+            // Footer
+            html += '<div class="footer animate-in">UAS Wildland Fire Collaborative</div>';
+
+            tracker.innerHTML = html;
+        }
+
+        function renderError(title, message) {
+            var tracker = document.getElementById('tracker');
+            tracker.innerHTML =
+                '<div class="header">' +
+                '  <div class="header-badge error"><span class="dot"></span> ERROR</div>' +
+                '  <div class="incident-name">' + escapeHtml(title) + '</div>' +
+                '  <div class="submission-meta" style="color: var(--text-secondary); margin-top: 12px; font-size: 13px; font-family: Space Grotesk, sans-serif;">' + escapeHtml(message) + '</div>' +
+                '</div>' +
+                '<div class="footer" style="margin-top: 40px;">UAS Wildland Fire Collaborative</div>';
+        }
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ==================================================================
+        // ELAPSED TIMER
+        // ==================================================================
+
+        function updateElapsed() {
+            var el = document.getElementById('elapsed-time');
+            if (!el) return;
+            var sec = Math.floor((Date.now() - startTime) / 1000);
+            var m = Math.floor(sec / 60);
+            var s = sec % 60;
+            el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        // ==================================================================
+        // POLLING
+        // ==================================================================
+
+        function fetchStatus() {
+            var url = SURVEY_LAYER_URL + '/query';
+            var body = new URLSearchParams();
+            body.append('where', 'objectid=' + oid);
+            body.append('outFields', 'processing_status,processing_notes,incident_name,flight_date');
+            body.append('f', 'json');
+            body.append('token', token);
+
+            fetch(url, { method: 'POST', body: body })
+                .then(function(resp) { return resp.json(); })
+                .then(function(data) {
+                    if (data.error) {
+                        // Token expired or auth error
+                        stopPolling();
+                        renderError('Session Expired', 'Your AGOL session has expired. Please refresh the page or reopen from Experience Builder.');
+                        return;
+                    }
+
+                    var features = data.features || [];
+                    if (features.length === 0) {
+                        renderError('Record Not Found', 'No submission found with OID ' + oid + '.');
+                        stopPolling();
+                        return;
+                    }
+
+                    var attrs = features[0].attributes;
+                    var status = attrs.processing_status || 'pending';
+                    var notes = attrs.processing_notes || '';
+                    var incident = attrs.incident_name || incidentParam || 'Unknown Fire';
+
+                    // Only re-render if status changed
+                    if (status !== currentStatus) {
+                        currentStatus = status;
+                        renderTracker(incident, status, notes);
+                    }
+
+                    // Stop polling on terminal states
+                    if (TERMINAL_STATES.indexOf(status) !== -1) {
+                        isTerminal = true;
+                        stopPolling();
+
+                        // Update elapsed display
+                        var elContainer = document.getElementById('elapsed-container');
+                        if (elContainer) {
+                            if (ERROR_STATES.indexOf(status) !== -1) {
+                                elContainer.innerHTML = '<span style="color: var(--red);">Processing stopped</span>';
+                            } else if (status === 'approved' || status === 'distributed') {
+                                elContainer.innerHTML = '<span style="color: var(--green);">Complete</span>';
+                            }
+                        }
+                    }
+                })
+                .catch(function(err) {
+                    console.error('Poll error:', err);
+                    // Show connection note but keep polling
+                    var note = document.querySelector('.connection-note');
+                    if (!note) {
+                        var tracker = document.getElementById('tracker');
+                        var div = document.createElement('div');
+                        div.className = 'connection-note';
+                        div.textContent = 'Reconnecting...';
+                        tracker.appendChild(div);
+                    }
+                });
+        }
+
+        function startPolling() {
+            fetchStatus();  // Initial fetch
+            pollTimer = setInterval(fetchStatus, POLL_INTERVAL_MS);
+            elapsedTimer = setInterval(updateElapsed, 1000);
+        }
+
+        function stopPolling() {
+            if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+            if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+        }
+
+        // ==================================================================
+        // INIT
+        // ==================================================================
+
+        if (!oid || !token) {
+            renderError('Missing Parameters', 'This page requires an OID and token. It should be opened from Experience Builder after submitting a survey.');
+            return;
+        }
+
+        startPolling();
+
+    })();
+    </script>
+</body>
+</html>
