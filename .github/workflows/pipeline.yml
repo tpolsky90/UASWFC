@@ -20,10 +20,6 @@ on:
       - submission_approved
       - test_ping
 
-  schedule:
-    # Fallback poll every 5 minutes (catches missed webhooks)
-    - cron: '*/5 * * * *'
-
   workflow_dispatch:
     # Manual trigger for testing
     inputs:
