@@ -380,6 +380,7 @@
     (function() {
         var WORKER_STATUS_URL = 'https://uaswfc.tpolsky90.workers.dev/status';
         var POLL_INTERVAL_MS = 8000;
+        var SLOW_POLL_MS = 30000;
         var COOKIE_NAME = 'uaswfc_pilot_email';
 
         var STAGE_KEYS = ['pending', 'processing', 'awaiting_approval', 'pilot_notified', 'approved', 'distributed'];
@@ -469,10 +470,15 @@
             }
 
             // Elapsed
-            if (TERMINAL_STATES.indexOf(status) !== -1) {
+            if (isStandby) {
+                $('elapsed-container').innerHTML = '<span style="color: var(--text-dim);">Waiting for submission</span>';
+            } else if (TERMINAL_STATES.indexOf(status) !== -1) {
                 $('elapsed-container').innerHTML = isError
                     ? '<span style="color: var(--red);">Processing stopped</span>'
                     : '<span style="color: var(--green);">Complete</span>';
+            } else if (!$('elapsed-time')) {
+                // Rebuild elapsed timer if it was replaced by terminal/standby message
+                $('elapsed-container').innerHTML = '<span>Elapsed </span><span class="elapsed-time" id="elapsed-time">0:00</span>';
             }
         }
 
@@ -496,21 +502,40 @@
                     if (data.error) { showFatalError('Server Error', data.detail || data.error); return; }
 
                     if (data.status === 'none') {
-                        if (!currentStatus) updateTracker(null, null, null, null);
+                        // No active submissions — show standby, slow poll for next one
+                        if (currentStatus !== null) {
+                            currentStatus = null;
+                            currentOid = null;
+                            updateTracker(null, null, null, null);
+                        }
+                        switchToSlowPoll();
                         return;
                     }
 
                     var status = data.status || 'pending';
                     if (status !== currentStatus || data.oid !== currentOid) {
+                        // New or changed record — reset timer if transitioning from standby
                         if (!currentStatus && status) startTime = Date.now();
                         currentStatus = status;
                         currentOid = data.oid;
                         updateTracker(status, (data.incident || '').trim(), data.oid, data.notes || '');
+                        // New active record detected — switch to fast polling
+                        switchToFastPoll();
                     }
-
-                    if (TERMINAL_STATES.indexOf(status) !== -1) stopPolling();
                 })
                 .catch(function(err) { console.error('Poll error:', err); });
+        }
+
+        function switchToFastPoll() {
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = setInterval(fetchStatus, POLL_INTERVAL_MS);
+            if (!elapsedTimer) elapsedTimer = setInterval(updateElapsed, 1000);
+        }
+
+        function switchToSlowPoll() {
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = setInterval(fetchStatus, SLOW_POLL_MS);
+            if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
         }
 
         function startPolling() {
