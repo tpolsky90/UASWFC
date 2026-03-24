@@ -55,139 +55,63 @@
             z-index: 0;
         }
 
-        .tracker {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 580px;
-        }
-
+        .tracker { position: relative; z-index: 1; width: 100%; max-width: 580px; }
         .screen { display: none; }
         .screen.visible { display: block; }
 
-        /* ============ EMAIL INPUT SCREEN ============ */
+        /* ============ EMAIL INPUT ============ */
         .email-screen { text-align: center; }
-
         .email-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-dim);
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 20px;
+            padding: 6px 16px; font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--text-secondary); margin-bottom: 24px;
         }
-
-        .email-badge .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--blue);
-        }
-
-        .email-title {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 8px;
-        }
-
-        .email-subtitle {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 32px;
-            line-height: 1.5;
-        }
-
-        .email-input-group {
-            display: flex;
-            gap: 8px;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
+        .email-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); }
+        .email-title { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+        .email-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; line-height: 1.5; }
+        .email-input-group { display: flex; gap: 8px; max-width: 400px; margin: 0 auto; }
         .email-input {
-            flex: 1;
-            background: var(--bg-card);
-            border: 1px solid var(--border-dim);
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            color: var(--text-primary);
-            outline: none;
-            transition: border-color 0.3s;
+            flex: 1; background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 8px;
+            padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 14px;
+            color: var(--text-primary); outline: none; transition: border-color 0.3s;
         }
-
         .email-input:focus { border-color: var(--amber); }
         .email-input::placeholder { color: var(--text-dim); }
-
         .email-btn {
-            background: var(--amber);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            color: #fff;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            white-space: nowrap;
+            background: var(--amber); border: none; border-radius: 8px; padding: 12px 24px;
+            font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600;
+            color: #fff; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
         }
-
         .email-btn:hover { opacity: 0.85; }
-
-        .email-footer {
-            margin-top: 16px;
-            font-size: 11px;
-            color: var(--text-dim);
-            font-family: 'JetBrains Mono', monospace;
+        .email-change {
+            margin-top: 24px; font-size: 11px; color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace; cursor: pointer;
+            transition: color 0.2s;
         }
+        .email-change:hover { color: var(--text-secondary); }
+        .email-footer { margin-top: 16px; font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
 
         /* ============ HEADER ============ */
         .header { text-align: center; margin-bottom: 32px; }
-
         .header-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-dim);
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            transition: all 0.4s;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 20px;
+            padding: 6px 16px; font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--text-secondary); margin-bottom: 20px; transition: all 0.4s;
         }
-
         .header-badge .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--amber);
-            animation: pulse-dot 2s ease-in-out infinite;
-            transition: background 0.4s;
+            width: 6px; height: 6px; border-radius: 50%; background: var(--amber);
+            animation: pulse-dot 2s ease-in-out infinite; transition: background 0.4s;
         }
-
         .header-badge.standby .dot { background: var(--text-dim); animation: pulse-dot 3s ease-in-out infinite; }
         .header-badge.complete .dot { background: var(--green); animation: none; }
         .header-badge.error .dot { background: var(--red); animation: none; }
-
         @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        .incident-name { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; transition: color 0.4s; }
-        .submission-meta { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); transition: color 0.4s; }
+        .incident-name { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
+        .submission-meta { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); }
 
         /* ============ PROGRESS BAR ============ */
         .progress-container { background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
@@ -198,106 +122,71 @@
         .progress-pct.standby { color: var(--text-dim); }
         .progress-label { color: var(--text-secondary); align-self: flex-end; transition: color 0.4s; }
         .progress-track { width: 100%; height: 8px; background: var(--bg-stage); border-radius: 4px; overflow: hidden; }
-
         .progress-fill {
-            height: 100%;
-            width: 0%;
+            height: 100%; width: 0%;
             background: linear-gradient(90deg, var(--amber), var(--amber-bright));
             border-radius: 4px;
-            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s;
+            transition: width 0.8s linear, background 0.5s;
             position: relative;
         }
-
         .progress-fill.complete { background: linear-gradient(90deg, var(--green), #6fdd8b); }
         .progress-fill.error { background: linear-gradient(90deg, var(--red), #ff8080); }
-
         .progress-fill::after {
-            content: '';
-            position: absolute;
-            right: 0; top: 0;
-            width: 40px; height: 100%;
+            content: ''; position: absolute; right: 0; top: 0; width: 40px; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
             animation: shimmer 1.5s ease-in-out infinite;
         }
-
         .progress-fill.complete::after, .progress-fill.error::after, .progress-fill.standby::after { animation: none; opacity: 0; }
-
         @keyframes shimmer { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 
         /* ============ STAGES ============ */
         .stages { display: flex; flex-direction: column; gap: 4px; }
-
         .stage {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-dim);
-            border-radius: 10px;
-            padding: 16px 20px;
-            transition: all 0.5s ease;
-            position: relative;
-            overflow: hidden;
+            display: flex; align-items: center; gap: 16px;
+            background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 10px;
+            padding: 14px 18px; transition: all 0.5s ease; position: relative; overflow: hidden;
         }
-
         .stage.active { border-color: var(--border-active); background: var(--bg-stage-active); box-shadow: 0 0 20px var(--amber-glow), inset 0 0 20px rgba(232,119,32,0.03); }
         .stage.done { border-color: var(--green-glow); }
         .stage.error-state { border-color: var(--red); background: #1a1115; box-shadow: 0 0 20px var(--red-glow); }
-
         .stage.active::before {
-            content: '';
-            position: absolute; top: 0; left: -100%;
-            width: 100%; height: 100%;
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
             background: linear-gradient(90deg, transparent, var(--amber-glow), transparent);
             animation: scan 2.5s ease-in-out infinite;
         }
-
         @keyframes scan { 0% { left: -100%; } 100% { left: 100%; } }
-
         .stage-icon {
-            width: 36px; height: 36px;
-            border-radius: 50%;
+            width: 34px; height: 34px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 16px; flex-shrink: 0;
-            background: var(--bg-stage);
-            border: 2px solid var(--border-dim);
-            transition: all 0.5s ease;
+            font-size: 14px; flex-shrink: 0; background: var(--bg-stage);
+            border: 2px solid var(--border-dim); transition: all 0.5s ease;
             position: relative; z-index: 1;
         }
-
         .stage.waiting .stage-icon { color: var(--text-dim); }
         .stage.active .stage-icon { border-color: var(--amber); background: #2a1a0a; color: var(--amber-bright); box-shadow: 0 0 12px var(--amber-glow); animation: pulse-icon 2s ease-in-out infinite; }
         .stage.done .stage-icon { border-color: var(--green); background: #0d2818; color: var(--green); }
         .stage.error-state .stage-icon { border-color: var(--red); background: #2a0d0d; color: var(--red); }
-
         @keyframes pulse-icon { 0%, 100% { box-shadow: 0 0 12px var(--amber-glow); } 50% { box-shadow: 0 0 24px var(--amber-glow); } }
-
         .stage-content { flex: 1; min-width: 0; position: relative; z-index: 1; }
-        .stage-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; transition: color 0.5s; }
+        .stage-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; transition: color 0.5s; }
         .stage.waiting .stage-title { color: var(--text-dim); }
         .stage.active .stage-title { color: var(--text-primary); }
         .stage.done .stage-title { color: var(--text-secondary); }
         .stage.error-state .stage-title { color: var(--red); }
-
-        .stage-desc { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); transition: color 0.5s; }
+        .stage-desc { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); transition: color 0.5s; }
         .stage.active .stage-desc { color: var(--text-secondary); }
-        .stage.done .stage-desc { color: var(--text-dim); }
-
         .stage-time { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); flex-shrink: 0; position: relative; z-index: 1; transition: color 0.5s; }
         .stage.active .stage-time { color: var(--amber); }
         .stage.done .stage-time { color: var(--green); }
 
-        /* ============ ERROR BANNER ============ */
-        .error-banner { background: #1a1115; border: 1px solid var(--red); border-radius: 10px; padding: 16px 20px; margin-top: 16px; text-align: center; transition: opacity 0.4s; }
+        /* ============ ERROR / ELAPSED / FOOTER ============ */
+        .error-banner { background: #1a1115; border: 1px solid var(--red); border-radius: 10px; padding: 16px 20px; margin-top: 16px; text-align: center; }
         .error-banner.hidden { display: none; }
         .error-banner p { font-size: 13px; color: var(--red); line-height: 1.5; }
-
-        /* ============ ELAPSED / FOOTER ============ */
         .elapsed { text-align: center; margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); }
         .elapsed-time { color: var(--text-secondary); font-size: 14px; font-weight: 600; }
         .footer { text-align: center; margin-top: 32px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); }
 
-        /* ============ ENTRANCE ANIMATION ============ */
         @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .animate-in { animation: fade-up 0.5s ease-out forwards; opacity: 0; }
         .animate-in:nth-child(1) { animation-delay: 0.05s; }
@@ -309,14 +198,15 @@
         .animate-in:nth-child(7) { animation-delay: 0.35s; }
         .animate-in:nth-child(8) { animation-delay: 0.4s; }
         .animate-in:nth-child(9) { animation-delay: 0.45s; }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-in:nth-child(10) { animation-delay: 0.5s; }
+        .animate-in:nth-child(11) { animation-delay: 0.55s; }
+        .animate-in:nth-child(12) { animation-delay: 0.6s; }
     </style>
 </head>
 <body>
     <div class="tracker" id="tracker">
 
-        <!-- SCREEN 1: EMAIL INPUT -->
+        <!-- EMAIL INPUT -->
         <div class="screen email-screen" id="screen-email">
             <div class="email-badge"><span class="dot"></span> SETUP</div>
             <div class="email-title">Mission Status Tracker</div>
@@ -328,14 +218,13 @@
             <div class="email-footer">UAS Wildland Fire Collaborative</div>
         </div>
 
-        <!-- SCREEN 2: TRACKER (static DOM, updated in place) -->
+        <!-- TRACKER (static DOM) -->
         <div class="screen" id="screen-tracker">
             <div class="header animate-in">
                 <div class="header-badge standby" id="hdr-badge"><span class="dot"></span> <span id="hdr-badge-text">STANDBY</span></div>
                 <div class="incident-name" id="hdr-incident">Standby</div>
                 <div class="submission-meta" id="hdr-meta">Waiting for submission</div>
             </div>
-
             <div class="progress-container animate-in">
                 <div class="progress-labels">
                     <span class="progress-pct standby" id="bar-pct">0%</span>
@@ -345,26 +234,24 @@
                     <div class="progress-fill standby" id="bar-fill" style="width: 0%"></div>
                 </div>
             </div>
-
             <div class="stages">
                 <div class="stage waiting animate-in" id="stage-0"><div class="stage-icon" id="icon-0">📡</div><div class="stage-content"><div class="stage-title">Submitted</div><div class="stage-desc">Queued for processing</div></div><div class="stage-time" id="time-0"></div></div>
-                <div class="stage waiting animate-in" id="stage-1"><div class="stage-icon" id="icon-1">🔥</div><div class="stage-content"><div class="stage-title">Generating Deliverables</div><div class="stage-desc">Building maps, shapefiles, GDB, KMZ</div></div><div class="stage-time" id="time-1"></div></div>
-                <div class="stage waiting animate-in" id="stage-2"><div class="stage-icon" id="icon-2">📋</div><div class="stage-content"><div class="stage-title">Ready for Review</div><div class="stage-desc">Deliverables generated</div></div><div class="stage-time" id="time-2"></div></div>
-                <div class="stage waiting animate-in" id="stage-3"><div class="stage-icon" id="icon-3">📧</div><div class="stage-content"><div class="stage-title">Email Sent</div><div class="stage-desc">Check your inbox</div></div><div class="stage-time" id="time-3"></div></div>
-                <div class="stage waiting animate-in" id="stage-4"><div class="stage-icon" id="icon-4">✅</div><div class="stage-content"><div class="stage-title">Approved</div><div class="stage-desc">Deliverables confirmed</div></div><div class="stage-time" id="time-4"></div></div>
-                <div class="stage waiting animate-in" id="stage-5"><div class="stage-icon" id="icon-5">🌐</div><div class="stage-content"><div class="stage-title">Distributed</div><div class="stage-desc">Delivered to incident team</div></div><div class="stage-time" id="time-5"></div></div>
+                <div class="stage waiting animate-in" id="stage-1"><div class="stage-icon" id="icon-1">📂</div><div class="stage-content"><div class="stage-title">Extracting NOVA Data</div><div class="stage-desc">Unzipping and reading shapefiles</div></div><div class="stage-time" id="time-1"></div></div>
+                <div class="stage waiting animate-in" id="stage-2"><div class="stage-icon" id="icon-2">🔥</div><div class="stage-content"><div class="stage-title">Building IR Features</div><div class="stage-desc">Creating perimeter and hotspot features</div></div><div class="stage-time" id="time-2"></div></div>
+                <div class="stage waiting animate-in" id="stage-3"><div class="stage-icon" id="icon-3">🗺️</div><div class="stage-content"><div class="stage-title">Generating Map PDF</div><div class="stage-desc">11x17 geospatial topo with CIM symbology</div></div><div class="stage-time" id="time-3"></div></div>
+                <div class="stage waiting animate-in" id="stage-4"><div class="stage-icon" id="icon-4">📦</div><div class="stage-content"><div class="stage-title">Creating Shapefiles & GDB</div><div class="stage-desc">NIROPS shells and NIFS schema export</div></div><div class="stage-time" id="time-4"></div></div>
+                <div class="stage waiting animate-in" id="stage-5"><div class="stage-icon" id="icon-5">🌐</div><div class="stage-content"><div class="stage-title">Generating KMZ & IRN Log</div><div class="stage-desc">Google Earth layer and interpreter log PDF</div></div><div class="stage-time" id="time-5"></div></div>
+                <div class="stage waiting animate-in" id="stage-6"><div class="stage-icon" id="icon-6">📤</div><div class="stage-content"><div class="stage-title">Uploading Deliverables</div><div class="stage-desc">Attaching package to submission record</div></div><div class="stage-time" id="time-6"></div></div>
+                <div class="stage waiting animate-in" id="stage-7"><div class="stage-icon" id="icon-7">✅</div><div class="stage-content"><div class="stage-title">Deliverables Ready</div><div class="stage-desc">Package complete, preparing notification</div></div><div class="stage-time" id="time-7"></div></div>
+                <div class="stage waiting animate-in" id="stage-8"><div class="stage-icon" id="icon-8">📧</div><div class="stage-content"><div class="stage-title">Email Sent</div><div class="stage-desc">Check your inbox for deliverables</div></div><div class="stage-time" id="time-8"></div></div>
             </div>
-
             <div class="error-banner hidden" id="error-banner"><p id="error-text"></p></div>
-
-            <div class="elapsed animate-in" id="elapsed-container">
-                <span>Elapsed </span><span class="elapsed-time" id="elapsed-time">0:00</span>
-            </div>
-
+            <div class="elapsed animate-in" id="elapsed-container"><span>Elapsed </span><span class="elapsed-time" id="elapsed-time">0:00</span></div>
             <div class="footer animate-in">UAS Wildland Fire Collaborative</div>
+            <div class="email-change" id="change-email-btn">Change tracking email</div>
         </div>
 
-        <!-- SCREEN 3: FATAL ERROR -->
+        <!-- FATAL ERROR -->
         <div class="screen" id="screen-error">
             <div class="header">
                 <div class="header-badge error"><span class="dot"></span> ERROR</div>
@@ -373,226 +260,278 @@
             </div>
             <div class="footer" style="margin-top: 40px;">UAS Wildland Fire Collaborative</div>
         </div>
-
     </div>
 
     <script>
     (function() {
-        var WORKER_STATUS_URL = 'https://uaswfc.tpolsky90.workers.dev/status';
-        var POLL_INTERVAL_MS = 8000;
-        var SLOW_POLL_MS = 30000;
-        var COOKIE_NAME = 'uaswfc_pilot_email';
+        var WORKER_URL = 'https://uaswfc.tpolsky90.workers.dev/status';
+        var POLL_MS = 8000;
+        var SLOW_MS = 30000;
+        var COOKIE = 'uaswfc_pilot_email';
+        var STAGE_COUNT = 9;
 
-        var STAGE_KEYS = ['pending', 'processing', 'awaiting_approval', 'pilot_notified', 'approved', 'distributed'];
-        var STAGE_PCTS = [15, 40, 65, 80, 95, 100];
-        var STAGE_ICONS = ['\u{1F4E1}', '\u{1F525}', '\u{1F4CB}', '\u{1F4E7}', '\u2705', '\u{1F310}'];
-        var STAGE_TITLES = ['Submitted', 'Generating Deliverables', 'Ready for Review', 'Email Sent', 'Approved', 'Distributed'];
+        // Stage map: index -> { realStatus, subIndex (within processing), pct, icon, label }
+        // Stages 1-6 are sub-steps of "processing", advanced by local timer
+        var STAGES = [
+            { pct: 8,   icon: '\u{1F4E1}' },  // 0: Submitted (pending)
+            { pct: 20,  icon: '\u{1F4C2}' },  // 1: Extracting NOVA Data
+            { pct: 35,  icon: '\u{1F525}' },  // 2: Building IR Features
+            { pct: 50,  icon: '\u{1F5FA}\uFE0F' },  // 3: Generating Map PDF
+            { pct: 65,  icon: '\u{1F4E6}' },  // 4: Creating Shapefiles & GDB
+            { pct: 78,  icon: '\u{1F310}' },  // 5: Generating KMZ & IRN Log
+            { pct: 85,  icon: '\u{1F4E4}' },  // 6: Uploading Deliverables
+            { pct: 92,  icon: '\u2705'    },  // 7: Deliverables Ready (awaiting_approval)
+            { pct: 100, icon: '\u{1F4E7}' }   // 8: Email Sent (pilot_notified)
+        ];
+
+        // Smooth interpolation ranges during "processing" (stages 1-6)
+        // Each: seconds start/end, which stage row, pct range to interpolate across
+        var SUB_RANGES = [
+            { start: 0,  end: 12, stage: 1, pctA: 20, pctB: 35 },
+            { start: 12, end: 25, stage: 2, pctA: 35, pctB: 50 },
+            { start: 25, end: 42, stage: 3, pctA: 50, pctB: 65 },
+            { start: 42, end: 55, stage: 4, pctA: 65, pctB: 78 },
+            { start: 55, end: 70, stage: 5, pctA: 78, pctB: 85 },
+            { start: 70, end: 95, stage: 6, pctA: 85, pctB: 90 }
+        ];
+
+        var REAL_STATUS_MAP = {
+            'pending': 0,
+            'processing': 1,
+            'awaiting_approval': 7,
+            'pilot_notified': 8
+        };
+
         var ERROR_STATES = ['error', 'revision_requested'];
-        var TERMINAL_STATES = ['approved', 'distributed', 'error', 'revision_requested'];
+        var DONE_STATES = ['pilot_notified', 'approved', 'distributed'];
 
         var email = '';
         var currentStatus = null;
         var currentOid = null;
+        var displayIndex = -1;
         var startTime = Date.now();
+        var processingStart = 0;
         var pollTimer = null;
         var elapsedTimer = null;
+        var subStepTimer = null;
 
         var $ = function(id) { return document.getElementById(id); };
 
-        function setCookie(val) {
-            document.cookie = COOKIE_NAME + '=' + encodeURIComponent(val) + '; max-age=31536000; path=/; SameSite=Lax';
-        }
+        // ============ COOKIES ============
+        function setCookie(v) { document.cookie = COOKIE + '=' + encodeURIComponent(v) + '; max-age=31536000; path=/; SameSite=Lax'; }
+        function getCookie() { var m = document.cookie.match(new RegExp('(?:^|; )' + COOKIE + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : ''; }
 
-        function getCookie() {
-            var match = document.cookie.match(new RegExp('(?:^|; )' + COOKIE_NAME + '=([^;]*)'));
-            return match ? decodeURIComponent(match[1]) : '';
-        }
-
+        // ============ SCREENS ============
         function showScreen(id) {
             $('screen-email').className = 'screen email-screen' + (id === 'email' ? ' visible' : '');
             $('screen-tracker').className = 'screen' + (id === 'tracker' ? ' visible' : '');
             $('screen-error').className = 'screen' + (id === 'error' ? ' visible' : '');
         }
+        function showFatalError(t, m) { $('err-title').textContent = t; $('err-msg').textContent = m; showScreen('error'); stopAll(); }
 
-        function showFatalError(title, msg) {
-            $('err-title').textContent = title;
-            $('err-msg').textContent = msg;
-            showScreen('error');
-            stopPolling();
-        }
+        // ============ DISPLAY UPDATE ============
+        function setDisplay(idx, incident, oid, notes, isError, customPct) {
+            var stageChanged = idx !== displayIndex || isError;
+            displayIndex = idx;
 
-        // ==================================================================
-        // IN-PLACE TRACKER UPDATE (classes + text only, no DOM rebuild)
-        // ==================================================================
+            var isStandby = idx < 0;
+            var pct = isStandby ? 0 : (customPct !== undefined ? customPct : STAGES[idx].pct);
+            var isDone = pct >= 100;
+            if (isDone) pct = 100;
+            var label = isStandby ? 'Idle' : isError ? 'ERROR' : isDone ? 'Processing Complete' : document.querySelector('#stage-' + idx + ' .stage-title').textContent;
 
-        function updateTracker(status, incident, oid, notes) {
-            var stageIndex = STAGE_KEYS.indexOf(status);
-            var isError = ERROR_STATES.indexOf(status) !== -1;
-            var pct = stageIndex >= 0 ? STAGE_PCTS[stageIndex] : 0;
-            var isComplete = pct === 100;
-            var isStandby = status === null;
+            // Header (only on stage change)
+            if (stageChanged) {
+                $('hdr-badge').className = 'header-badge' + (isStandby ? ' standby' : '') + (isDone ? ' complete' : '') + (isError ? ' error' : '');
+                $('hdr-badge-text').textContent = isStandby ? 'STANDBY' : isError ? 'ERROR' : isDone ? 'COMPLETE' : 'TRACKING';
+                $('hdr-incident').textContent = isStandby ? 'Standby' : (incident || 'Unknown Fire');
+                $('hdr-meta').textContent = isStandby ? 'Waiting for submission' : ('OID ' + (oid || ''));
+            }
 
-            // Header
-            $('hdr-badge').className = 'header-badge' + (isStandby ? ' standby' : '') + (isComplete ? ' complete' : '') + (isError ? ' error' : '');
-            $('hdr-badge-text').textContent = isStandby ? 'STANDBY' : isError ? 'ERROR' : isComplete ? 'COMPLETE' : 'TRACKING';
-            $('hdr-incident').textContent = isStandby ? 'Standby' : (incident || 'Unknown Fire');
-            $('hdr-meta').textContent = isStandby ? 'Waiting for submission' : ('OID ' + (oid || ''));
-
-            // Progress bar
+            // Bar (always update for smooth pct ticking)
             $('bar-pct').textContent = pct + '%';
-            $('bar-pct').className = 'progress-pct' + (isStandby ? ' standby' : '') + (isComplete ? ' complete' : '') + (isError ? ' error' : '');
-            $('bar-label').textContent = isStandby ? 'Idle' : isError ? status.replace('_', ' ').toUpperCase() : STAGE_TITLES[Math.max(0, stageIndex)];
+            $('bar-pct').className = 'progress-pct' + (isStandby ? ' standby' : '') + (isDone ? ' complete' : '') + (isError ? ' error' : '');
+            $('bar-label').textContent = label;
             $('bar-fill').style.width = pct + '%';
-            $('bar-fill').className = 'progress-fill' + (isStandby ? ' standby' : '') + (isComplete ? ' complete' : '') + (isError ? ' error' : '');
+            $('bar-fill').className = 'progress-fill' + (isStandby ? ' standby' : '') + (isDone ? ' complete' : '') + (isError ? ' error' : '');
 
-            // Stages
-            for (var i = 0; i < 6; i++) {
-                var state = 'waiting';
-                if (isError) {
-                    if (i < stageIndex) state = 'done';
-                    else if (i === stageIndex) state = 'error-state';
-                } else if (!isStandby) {
-                    if (i < stageIndex) state = 'done';
-                    else if (i === stageIndex) state = (status === 'distributed') ? 'done' : 'active';
+            // Stages (only update classes on stage change to avoid CSS transition resets)
+            if (stageChanged) {
+                for (var i = 0; i < STAGE_COUNT; i++) {
+                    var state = 'waiting';
+                    if (isError && i <= idx) {
+                        state = i < idx ? 'done' : 'error-state';
+                    } else if (!isStandby && !isError) {
+                        if (i < idx) state = 'done';
+                        else if (i === idx) state = isDone ? 'done' : 'active';
+                    }
+                    $('stage-' + i).className = 'stage ' + state;
+                    $('icon-' + i).textContent = state === 'done' ? '\u2713' : state === 'error-state' ? '\u2715' : STAGES[i].icon;
+                    $('time-' + i).textContent = state === 'done' ? 'done' : '';
                 }
 
-                $('stage-' + i).className = 'stage ' + state;
-                $('icon-' + i).textContent = state === 'done' ? '\u2713' : state === 'error-state' ? '\u2715' : STAGE_ICONS[i];
-                $('time-' + i).textContent = state === 'done' ? 'done' : '';
-            }
+                // Error banner
+                if (isError && notes) { $('error-banner').className = 'error-banner'; $('error-text').textContent = notes; }
+                else { $('error-banner').className = 'error-banner hidden'; }
 
-            // Error banner
-            if (isError && notes) {
-                $('error-banner').className = 'error-banner';
-                $('error-text').textContent = notes;
-            } else {
-                $('error-banner').className = 'error-banner hidden';
-            }
-
-            // Elapsed
-            if (isStandby) {
-                $('elapsed-container').innerHTML = '<span style="color: var(--text-dim);">Waiting for submission</span>';
-            } else if (TERMINAL_STATES.indexOf(status) !== -1) {
-                $('elapsed-container').innerHTML = isError
-                    ? '<span style="color: var(--red);">Processing stopped</span>'
-                    : '<span style="color: var(--green);">Complete</span>';
-            } else if (!$('elapsed-time')) {
-                // Rebuild elapsed timer if it was replaced by terminal/standby message
-                $('elapsed-container').innerHTML = '<span>Elapsed </span><span class="elapsed-time" id="elapsed-time">0:00</span>';
+                // Elapsed
+                if (isStandby) {
+                    $('elapsed-container').innerHTML = '<span style="color: var(--text-dim);">Waiting for submission</span>';
+                } else if (isDone) {
+                    $('elapsed-container').innerHTML = '<span style="color: var(--green);">Processing Complete</span>';
+                } else if (isError) {
+                    $('elapsed-container').innerHTML = '<span style="color: var(--red);">Processing stopped</span>';
+                } else if (!$('elapsed-time')) {
+                    $('elapsed-container').innerHTML = '<span>Elapsed </span><span class="elapsed-time" id="elapsed-time">0:00</span>';
+                }
             }
         }
 
+        // ============ SUB-STEP TIMER (runs during "processing") ============
+        function startSubSteps() {
+            processingStart = Date.now();
+            stopSubSteps();
+            subStepTimer = setInterval(function() {
+                if (currentStatus !== 'processing') { stopSubSteps(); return; }
+                var elapsed = (Date.now() - processingStart) / 1000;
+
+                // Find which range we're in
+                var range = SUB_RANGES[SUB_RANGES.length - 1];
+                for (var i = 0; i < SUB_RANGES.length; i++) {
+                    if (elapsed < SUB_RANGES[i].end) { range = SUB_RANGES[i]; break; }
+                }
+
+                // Interpolate percentage smoothly within this range
+                var progress = Math.min(1, Math.max(0, (elapsed - range.start) / (range.end - range.start)));
+                var pct = Math.round(range.pctA + progress * (range.pctB - range.pctA));
+
+                setDisplay(range.stage, $('hdr-incident').textContent, currentOid, null, false, pct);
+            }, 1000);
+        }
+
+        function stopSubSteps() {
+            if (subStepTimer) { clearInterval(subStepTimer); subStepTimer = null; }
+        }
+
+        // ============ ELAPSED ============
         function updateElapsed() {
             var el = $('elapsed-time');
             if (!el) return;
-            var sec = Math.floor((Date.now() - startTime) / 1000);
-            var m = Math.floor(sec / 60);
-            var s = sec % 60;
-            el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+            var s = Math.floor((Date.now() - startTime) / 1000);
+            el.textContent = Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
         }
 
-        // ==================================================================
-        // POLLING
-        // ==================================================================
-
+        // ============ POLLING ============
         function fetchStatus() {
-            fetch(WORKER_STATUS_URL + '?email=' + encodeURIComponent(email))
-                .then(function(resp) { return resp.json(); })
-                .then(function(data) {
-                    if (data.error) { showFatalError('Server Error', data.detail || data.error); return; }
+            fetch(WORKER_URL + '?email=' + encodeURIComponent(email))
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.error) { showFatalError('Server Error', d.detail || d.error); return; }
 
-                    if (data.status === 'none') {
-                        // No active submissions — show standby, slow poll for next one
+                    if (d.status === 'none') {
                         if (currentStatus !== null) {
                             currentStatus = null;
                             currentOid = null;
-                            updateTracker(null, null, null, null);
+                            stopSubSteps();
+                            setDisplay(-1, null, null, null, false);
+                        } else if (displayIndex < 0) {
+                            setDisplay(-1, null, null, null, false);
                         }
-                        switchToSlowPoll();
+                        switchPoll(SLOW_MS);
                         return;
                     }
 
-                    var status = data.status || 'pending';
-                    if (status !== currentStatus || data.oid !== currentOid) {
-                        // New or changed record — reset timer if transitioning from standby
-                        if (!currentStatus && status) startTime = Date.now();
+                    var status = d.status;
+                    var incident = (d.incident || 'Unknown Fire').trim();
+                    var oid = d.oid;
+                    var notes = d.notes || '';
+                    var isError = ERROR_STATES.indexOf(status) !== -1;
+
+                    if (status !== currentStatus || oid !== currentOid) {
+                        if (!currentStatus) startTime = Date.now();
                         currentStatus = status;
-                        currentOid = data.oid;
-                        updateTracker(status, (data.incident || '').trim(), data.oid, data.notes || '');
-                        // New active record detected — switch to fast polling
-                        switchToFastPoll();
+                        currentOid = oid;
+
+                        if (status === 'processing') {
+                            setDisplay(1, incident, oid, notes, false);
+                            startSubSteps();
+                            switchPoll(POLL_MS);
+                        } else if (isError) {
+                            stopSubSteps();
+                            var errIdx = REAL_STATUS_MAP[status] || 0;
+                            setDisplay(errIdx, incident, oid, notes, true);
+                            switchPoll(SLOW_MS);
+                        } else {
+                            stopSubSteps();
+                            var realIdx = REAL_STATUS_MAP[status];
+                            if (realIdx !== undefined) {
+                                setDisplay(realIdx, incident, oid, notes, false);
+                            }
+                            if (DONE_STATES.indexOf(status) !== -1) {
+                                switchPoll(SLOW_MS);
+                            } else {
+                                switchPoll(POLL_MS);
+                            }
+                        }
                     }
                 })
-                .catch(function(err) { console.error('Poll error:', err); });
+                .catch(function(e) { console.error('Poll error:', e); });
         }
 
-        function switchToFastPoll() {
+        function switchPoll(ms) {
             if (pollTimer) clearInterval(pollTimer);
-            pollTimer = setInterval(fetchStatus, POLL_INTERVAL_MS);
-            if (!elapsedTimer) elapsedTimer = setInterval(updateElapsed, 1000);
-        }
-
-        function switchToSlowPoll() {
-            if (pollTimer) clearInterval(pollTimer);
-            pollTimer = setInterval(fetchStatus, SLOW_POLL_MS);
-            if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+            pollTimer = setInterval(fetchStatus, ms);
+            if (ms === SLOW_MS) {
+                if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+            } else {
+                if (!elapsedTimer) elapsedTimer = setInterval(updateElapsed, 1000);
+            }
         }
 
         function startPolling() {
-            currentStatus = null;
-            currentOid = null;
+            currentStatus = null; currentOid = null; displayIndex = -1;
             startTime = Date.now();
-            updateTracker(null, null, null, null);
+            setDisplay(-1, null, null, null, false);
             showScreen('tracker');
             fetchStatus();
-            pollTimer = setInterval(fetchStatus, POLL_INTERVAL_MS);
+            pollTimer = setInterval(fetchStatus, POLL_MS);
             elapsedTimer = setInterval(updateElapsed, 1000);
         }
 
-        function stopPolling() {
+        function stopAll() {
             if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
             if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+            stopSubSteps();
         }
 
-        // ==================================================================
-        // EMAIL INPUT
-        // ==================================================================
-
-        function handleEmailSubmit() {
-            var val = $('email-input').value.trim();
-            if (!val || val.indexOf('@') === -1) {
+        // ============ EMAIL INPUT ============
+        function handleEmail() {
+            var v = $('email-input').value.trim();
+            if (!v || v.indexOf('@') === -1) {
                 $('email-input').style.borderColor = 'var(--red)';
                 setTimeout(function() { $('email-input').style.borderColor = ''; }, 1500);
                 return;
             }
-            email = val;
+            email = v;
             setCookie(email);
             startPolling();
         }
 
-        $('email-btn').addEventListener('click', handleEmailSubmit);
-        $('email-input').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') handleEmailSubmit();
+        $('email-btn').addEventListener('click', handleEmail);
+        $('email-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') handleEmail(); });
+        $('change-email-btn').addEventListener('click', function() {
+            stopAll();
+            showScreen('email');
+            $('email-input').value = email;
+            $('email-input').focus();
         });
 
-        // ==================================================================
-        // INIT
-        // ==================================================================
-
+        // ============ INIT ============
         var saved = getCookie();
-        var paramEmail = new URLSearchParams(window.location.search).get('email');
-
-        if (paramEmail) {
-            email = paramEmail;
-            setCookie(email);
-            startPolling();
-        } else if (saved) {
-            email = saved;
-            $('email-input').value = saved;
-            startPolling();
-        } else {
-            showScreen('email');
-        }
+        var param = new URLSearchParams(window.location.search).get('email');
+        if (param) { email = param; setCookie(email); startPolling(); }
+        else if (saved) { email = saved; $('email-input').value = saved; startPolling(); }
+        else { showScreen('email'); }
     })();
     </script>
 </body>
