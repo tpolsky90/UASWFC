@@ -426,7 +426,16 @@
             fetch(WORKER_URL + '?email=' + encodeURIComponent(email))
                 .then(function(r) { return r.json(); })
                 .then(function(d) {
-                    if (d.error) { showFatalError('Server Error', d.detail || d.error); return; }
+                    if (d.error) {
+                        // Auth failure is fatal (bad credentials)
+                        if (d.error === 'auth_failed' || d.error === 'missing_param') {
+                            showFatalError('Authentication Error', d.detail || d.error);
+                            return;
+                        }
+                        // Everything else is transient - just log and keep polling
+                        console.warn('Worker error (retrying):', d.error, d.detail);
+                        return;
+                    }
 
                     if (d.status === 'none') {
                         if (currentStatus !== null) {
