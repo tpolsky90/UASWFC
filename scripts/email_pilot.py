@@ -74,13 +74,23 @@ def get_agol_token(expiration_minutes=120):
 
 def query_features(token, where_clause, out_fields="*"):
     """Query the Survey123 response layer."""
-    resp = requests.post(f"{SURVEY_LAYER_URL}/query", data={
+    url = f"{SURVEY_LAYER_URL}/query"
+    resp = requests.post(url, data={
         "where": where_clause,
         "outFields": out_fields,
         "f": "json",
         "token": token
     })
+    print(f"[QUERY] URL: {url}")
+    print(f"[QUERY] Status: {resp.status_code}")
+    print(f"[QUERY] Response: {resp.text[:500]}")
+    if not resp.text:
+        print("[QUERY] ERROR: Empty response from AGOL")
+        return []
     data = resp.json()
+    if "error" in data:
+        print(f"[QUERY] AGOL Error: {data['error']}")
+        return []
     return data.get("features", [])
 
 
